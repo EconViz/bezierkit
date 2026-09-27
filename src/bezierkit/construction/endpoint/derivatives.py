@@ -26,7 +26,9 @@ class EndpointDerivatives(Construction[BezierCurve]):
             self.end_derivative.dimension,
         }
         if len(dimensions) != 1:
-            raise DimensionMismatch(f"endpoint and derivative dimensions differ: {sorted(dimensions)}")
+            raise DimensionMismatch(
+                f"endpoint and derivative dimensions differ: {sorted(dimensions)}"
+            )
 
     def build(self) -> BezierCurve:
         p1 = self.start + self.start_derivative * (1.0 / 3.0)

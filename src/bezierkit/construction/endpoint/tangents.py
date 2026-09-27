@@ -29,7 +29,9 @@ class TangentDirections(Construction[BezierCurve]):
             self.end_direction.dimension,
         }
         if len(dimensions) != 1:
-            raise DimensionMismatch(f"endpoint and direction dimensions differ: {sorted(dimensions)}")
+            raise DimensionMismatch(
+                f"endpoint and direction dimensions differ: {sorted(dimensions)}"
+            )
         if self.start_handle < 0 or self.end_handle < 0:
             raise ValueError("handle lengths must be non-negative")
 
