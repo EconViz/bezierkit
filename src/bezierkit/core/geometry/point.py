@@ -54,11 +54,13 @@ class Point:
             )
         return Point(*(a + b for a, b in zip(self.coords, other.coords, strict=True)))
 
-    def __sub__(self, other: Point) -> Vector:
+    def __sub__(self, other: Point | Vector) -> Vector | Point:
         from bezierkit.core.geometry.vector import Vector
 
         if self.dimension != other.dimension:
             raise DimensionMismatch(
-                f"point dimensions differ: {self.dimension} and {other.dimension}"
+                f"dimensions differ: {self.dimension} and {other.dimension}"
             )
+        if isinstance(other, Vector):
+            return Point(*(a - b for a, b in zip(self.coords, other.coords, strict=True)))
         return Vector(*(a - b for a, b in zip(self.coords, other.coords, strict=True)))
