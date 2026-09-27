@@ -1,0 +1,1 @@
+"""Pluggable Bézier evaluation strategies."""
