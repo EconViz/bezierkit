@@ -49,7 +49,8 @@ class Point:
     def __add__(self, other: Vector) -> Point:
         if self.dimension != other.dimension:
             raise DimensionMismatch(
-                f"point dimension {self.dimension} does not match vector dimension {other.dimension}"
+                f"point dimension {self.dimension} does not match "
+                f"vector dimension {other.dimension}"
             )
         return Point(*(a + b for a, b in zip(self.coords, other.coords, strict=True)))
 
