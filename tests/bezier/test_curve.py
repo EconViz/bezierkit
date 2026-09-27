@@ -68,3 +68,22 @@ def test_curve_derivative_validates_order() -> None:
     curve = BezierCurve.linear(Point(0, 0), Point(1, 1))
     with pytest.raises(ValueError, match="non-negative"):
         curve.derivative(-1)
+
+
+def test_curve_split_and_segment_preserve_parameterization() -> None:
+    curve = BezierCurve.cubic(Point(0, 0), Point(1, 2), Point(3, 2), Point(4, 0))
+    left, right = curve.split(0.3)
+    assert left.at(1) == curve.at(0.3)
+    assert right.at(0) == curve.at(0.3)
+    segment = curve.segment(0.25, 0.75)
+    assert segment.at(0) == curve.at(0.25)
+    assert segment.at(1) == curve.at(0.75)
+    assert segment.at(0.5) == curve.at(0.5)
+
+
+def test_curve_reversal_is_an_involution() -> None:
+    curve = BezierCurve.quadratic(Point(0, 0), Point(1, 3), Point(4, 2))
+    reversed_curve = curve.reversed()
+    for t in [0, 0.2, 0.8, 1]:
+        assert reversed_curve.at(t) == curve.at(1 - t)
+        assert reversed_curve.reversed().at(t) == curve.at(t)

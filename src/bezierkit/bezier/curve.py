@@ -7,9 +7,12 @@ import numpy as np
 from bezierkit.bezier.evaluation.casteljau import DeCasteljauEvaluator
 from bezierkit.bezier.evaluation.evaluator import Evaluator
 from bezierkit.bezier.operations.hodograph import Hodograph
+from bezierkit.bezier.operations.subdivision import Subdivider
 from bezierkit.bezier.polygon import ControlPolygon
 from bezierkit.core.capabilities.curve import ParametricCurve
 from bezierkit.core.capabilities.differentiable import Differentiable
+from bezierkit.core.capabilities.reversible import Reversible
+from bezierkit.core.capabilities.subdividable import Subdividable
 from bezierkit.core.domain.interval import Interval
 from bezierkit.core.domain.parameter import ParameterValues
 from bezierkit.core.errors import DimensionMismatch
@@ -17,7 +20,7 @@ from bezierkit.core.geometry.point import Point
 from bezierkit.core.geometry.point_set import PointSet
 
 
-class BezierCurve(ParametricCurve, Differentiable):
+class BezierCurve(ParametricCurve, Differentiable, Subdividable, Reversible):
     """An immutable, degree-generic Bézier curve."""
 
     def __init__(
@@ -55,6 +58,22 @@ class BezierCurve(ParametricCurve, Differentiable):
         for _ in range(order):
             polygon = Hodograph.of(polygon)
         return BezierCurve(polygon, evaluator=self._evaluator)
+
+    def split(self, t: float) -> tuple[BezierCurve, BezierCurve]:
+        left, right = Subdivider.split(self._polygon, t)
+        return (
+            BezierCurve(left, evaluator=self._evaluator),
+            BezierCurve(right, evaluator=self._evaluator),
+        )
+
+    def segment(self, t0: float, t1: float) -> BezierCurve:
+        return BezierCurve(
+            Subdivider.segment(self._polygon, t0, t1),
+            evaluator=self._evaluator,
+        )
+
+    def reversed(self) -> BezierCurve:
+        return BezierCurve(self._polygon.points.array[::-1], evaluator=self._evaluator)
 
     @classmethod
     def _from_points(cls, points: tuple[Point, ...]) -> BezierCurve:
