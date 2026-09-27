@@ -14,7 +14,9 @@ app = typer.Typer(help="Construct cubic Bézier control points from endpoint con
 
 def _emit(curve: BezierCurve) -> None:
     payload = {"control_points": [list(point.coords) for point in curve.control_points]}
-    typer.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    typer.echo(
+        json.dumps(payload, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+    )
 
 
 @app.command()

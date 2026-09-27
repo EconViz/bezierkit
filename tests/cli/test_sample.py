@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -48,3 +50,27 @@ def test_sample_rejects_unknown_format() -> None:
         ["--points", "0,0", "--points", "1,1", "--format", "yaml"],
     )
     assert result.exit_code == 1
+
+
+def test_module_cli_rejects_non_finite_json() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "bezierkit.cli",
+            "sample",
+            "--points",
+            "nan,0",
+            "--points",
+            "1,1",
+            "--count",
+            "2",
+            "--format",
+            "json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "NaN" not in result.stdout

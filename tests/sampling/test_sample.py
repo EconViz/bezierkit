@@ -29,3 +29,12 @@ def test_sample_copies_and_freezes_parameters() -> None:
     assert sample.t[0] == 0
     with pytest.raises(ValueError):
         sample.t[0] = 0.5
+
+
+def test_public_sample_parameters_cannot_mutate_storage() -> None:
+    sample = Sample(np.array([0.0, 1.0]), PointSet([[0, 0], [1, 1]]))
+    exposed = sample.t
+    exposed.setflags(write=True)
+    exposed[:] = [0.25, 0.75]
+    exposed.shape = (1, 2)
+    assert np.allclose(sample.t, [0, 1])

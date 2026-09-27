@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from bezierkit.bezier.curve import BezierCurve
@@ -32,6 +33,8 @@ class TangentDirections(Construction[BezierCurve]):
             raise DimensionMismatch(
                 f"endpoint and direction dimensions differ: {sorted(dimensions)}"
             )
+        if not math.isfinite(self.start_handle) or not math.isfinite(self.end_handle):
+            raise ValueError("handle lengths must be finite")
         if self.start_handle < 0 or self.end_handle < 0:
             raise ValueError("handle lengths must be non-negative")
 

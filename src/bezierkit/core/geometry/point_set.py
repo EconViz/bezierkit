@@ -13,7 +13,7 @@ from bezierkit.core.geometry.point import Point
 class PointSet:
     """An immutable batch of points backed by an ``(count, dimension)`` array."""
 
-    array: np.ndarray
+    _array: np.ndarray
 
     def __init__(self, values: ArrayLike | Iterable[Point]) -> None:
         materialized = list(values) if not isinstance(values, np.ndarray) else values
@@ -24,21 +24,31 @@ class PointSet:
             raise ValueError(f"PointSet requires a 2D array, got shape {array.shape}")
         if 0 in array.shape:
             raise ValueError("PointSet requires at least one point and one dimension")
+        if not np.all(np.isfinite(array)):
+            raise ValueError("PointSet coordinates must be finite")
         array.setflags(write=False)
-        object.__setattr__(self, "array", array)
+        object.__setattr__(self, "_array", array)
+
+    @property
+    def array(self) -> np.ndarray:
+        result = self._array.copy()
+        result.setflags(write=False)
+        return result
 
     @property
     def count(self) -> int:
-        return int(self.array.shape[0])
+        return int(self._array.shape[0])
 
     @property
     def dimension(self) -> int:
-        return int(self.array.shape[1])
+        return int(self._array.shape[1])
 
     def _column(self, index: int, name: str) -> np.ndarray:
         if self.dimension <= index:
             raise AttributeError(f"PointSet has no {name} column (dimension < {index + 1})")
-        return self.array[:, index]
+        result = self._array[:, index].copy()
+        result.setflags(write=False)
+        return result
 
     @property
     def x(self) -> np.ndarray:
@@ -53,10 +63,10 @@ class PointSet:
         return self._column(2, "z")
 
     def __iter__(self) -> Iterator[Point]:
-        return (Point(*row) for row in self.array)
+        return (Point(*row) for row in self._array)
 
     def __len__(self) -> int:
         return self.count
 
     def __getitem__(self, index: int) -> Point:
-        return Point(*self.array[index])
+        return Point(*self._array[index])

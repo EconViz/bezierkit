@@ -13,7 +13,9 @@ Rows = Sequence[dict[str, Any]]
 
 
 def render_json(rows: Rows) -> str:
-    return json.dumps(list(rows), ensure_ascii=False, separators=(",", ":"))
+    return json.dumps(
+        list(rows), ensure_ascii=False, allow_nan=False, separators=(",", ":")
+    )
 
 
 def render_csv(rows: Rows) -> str:

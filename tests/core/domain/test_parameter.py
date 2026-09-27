@@ -22,3 +22,12 @@ def test_parameter_values_are_read_only() -> None:
     values = ParameterValues.from_input([0, 1], domain=Interval(0, 1))
     with pytest.raises(ValueError):
         values.array[0] = 0.5
+
+
+def test_public_parameter_array_cannot_mutate_storage() -> None:
+    values = ParameterValues.from_input([0, 1], domain=Interval(0, 1))
+    exposed = values.array
+    exposed.setflags(write=True)
+    exposed[:] = [0.2, 0.8]
+    exposed.shape = (1, 2)
+    assert np.allclose(values.array, [0, 1])

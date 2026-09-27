@@ -40,3 +40,8 @@ def test_point_set_owns_read_only_copy() -> None:
     assert points.x[0] == 0
     with pytest.raises(ValueError):
         points.array[0, 0] = 5
+
+
+def test_point_set_rejects_non_finite_coordinates() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        PointSet([[0, float("nan")]])

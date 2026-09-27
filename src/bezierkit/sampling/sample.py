@@ -13,7 +13,7 @@ from bezierkit.core.geometry.point_set import PointSet
 class Sample:
     """Immutable parameter values paired with sampled points."""
 
-    t: np.ndarray
+    _t: np.ndarray
     points: PointSet
 
     def __init__(self, t: np.ndarray, points: PointSet) -> None:
@@ -25,8 +25,14 @@ class Sample:
                 f"parameter count {len(values)} does not match point count {points.count}"
             )
         values.setflags(write=False)
-        object.__setattr__(self, "t", values)
+        object.__setattr__(self, "_t", values)
         object.__setattr__(self, "points", points)
+
+    @property
+    def t(self) -> np.ndarray:
+        result = self._t.copy()
+        result.setflags(write=False)
+        return result
 
     @property
     def x(self) -> np.ndarray:
@@ -37,7 +43,7 @@ class Sample:
         return self.points.y
 
     def __iter__(self) -> Iterator[tuple[float, Point]]:
-        return ((float(t), point) for t, point in zip(self.t, self.points, strict=True))
+        return ((float(t), point) for t, point in zip(self._t, self.points, strict=True))
 
     def __len__(self) -> int:
-        return len(self.t)
+        return len(self._t)

@@ -36,3 +36,11 @@ def test_tangent_directions_validate_dimensions_and_handles() -> None:
         TangentDirections(
             Point(0, 0), Point(1, 1), Vector(1, 0), Vector(1, 0), start_handle=-1
         )
+    with pytest.raises(ValueError, match="finite"):
+        TangentDirections(
+            Point(0, 0),
+            Point(1, 1),
+            Vector(1, 0),
+            Vector(1, 0),
+            start_handle=float("nan"),
+        )

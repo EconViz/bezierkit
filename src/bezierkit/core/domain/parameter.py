@@ -13,14 +13,20 @@ from bezierkit.core.errors import ParameterOutOfDomain
 class ParameterValues:
     """Validated, immutable parameter values."""
 
-    array: np.ndarray
+    _array: np.ndarray
 
     def __init__(self, values: np.ndarray) -> None:
         array = np.array(values, dtype=float, copy=True)
         if array.ndim != 1 or array.size == 0:
             raise ValueError("ParameterValues requires a non-empty one-dimensional array")
         array.setflags(write=False)
-        object.__setattr__(self, "array", array)
+        object.__setattr__(self, "_array", array)
+
+    @property
+    def array(self) -> np.ndarray:
+        result = self._array.copy()
+        result.setflags(write=False)
+        return result
 
     @classmethod
     def from_input(
@@ -38,4 +44,4 @@ class ParameterValues:
         return cls(array)
 
     def __len__(self) -> int:
-        return len(self.array)
+        return len(self._array)

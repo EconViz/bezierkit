@@ -17,7 +17,10 @@ class Vector:
     def __init__(self, *coords: float) -> None:
         if not coords:
             raise ValueError("Vector requires at least one coordinate")
-        object.__setattr__(self, "coords", tuple(float(value) for value in coords))
+        values = tuple(float(value) for value in coords)
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError("Vector coordinates must be finite")
+        object.__setattr__(self, "coords", values)
 
     @property
     def dimension(self) -> int:

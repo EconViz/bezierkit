@@ -42,3 +42,9 @@ def test_point_array_is_independent() -> None:
 def test_point_requires_a_coordinate() -> None:
     with pytest.raises(ValueError):
         Point()
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+def test_point_rejects_non_finite_coordinates(value: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        Point(value, 0)
