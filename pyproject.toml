@@ -1,0 +1,81 @@
+[project]
+name = "bezierkit"
+version = "0.2.0"
+description = "A small mathematical toolkit for constructing and analyzing Bezier curves."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "EconViz" }]
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.scripts]
+bezierkit = "bezierkit.cli.app:main"
+
+[project.optional-dependencies]
+cli = [
+    "rich>=13",
+    "typer>=0.12",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bezierkit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.importlinter]
+root_package = "bezierkit"
+
+[[tool.importlinter.contracts]]
+name = "core has no internal dependencies"
+type = "forbidden"
+source_modules = ["bezierkit.core"]
+forbidden_modules = [
+  "bezierkit.bezier",
+  "bezierkit.construction",
+  "bezierkit.sampling",
+  "bezierkit.cli",
+]
+
+[[tool.importlinter.contracts]]
+name = "sampling only depends on core"
+type = "forbidden"
+source_modules = ["bezierkit.sampling"]
+forbidden_modules = ["bezierkit.bezier", "bezierkit.construction", "bezierkit.cli"]
+
+[[tool.importlinter.contracts]]
+name = "operations do not depend on evaluation"
+type = "forbidden"
+source_modules = ["bezierkit.bezier.operations"]
+forbidden_modules = ["bezierkit.bezier.evaluation"]
+
+[[tool.importlinter.contracts]]
+name = "application layers"
+type = "layers"
+layers = [
+  "bezierkit.cli",
+  "bezierkit.construction",
+  "bezierkit.bezier",
+  "bezierkit.core",
+]
+
+[dependency-groups]
+dev = [
+    "import-linter>=2",
+    "pytest>=8",
+    "ruff>=0.6",
+]
