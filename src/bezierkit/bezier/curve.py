@@ -41,6 +41,10 @@ class BezierCurve(ParametricCurve, Differentiable, Subdividable, Reversible):
         return self._polygon.degree
 
     @property
+    def control_points(self) -> PointSet:
+        return self._polygon.points
+
+    @property
     def domain(self) -> Interval:
         return Interval(0.0, 1.0)
 

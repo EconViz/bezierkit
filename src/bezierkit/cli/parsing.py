@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
 import math
+import sys
+from typing import TextIO
 
 from bezierkit import Point, Vector
 from bezierkit.core.errors import BezierKitError
@@ -21,6 +24,28 @@ def parse_point(raw: str) -> Point:
 def parse_vector(raw: str) -> Vector:
     point = parse_point(raw)
     return Vector(*point.coords)
+
+
+def resolve_control_points(
+    raw_points: list[str] | None,
+    *,
+    stream: TextIO | None = None,
+) -> list[Point]:
+    if raw_points:
+        return [parse_point(raw) for raw in raw_points]
+    input_stream = stream or sys.stdin
+    if input_stream.isatty():
+        raise BezierKitError("control points are required via --points or stdin JSON")
+    try:
+        payload = json.loads(input_stream.read())
+        coordinates = payload["control_points"]
+        if not isinstance(coordinates, list) or not coordinates:
+            raise ValueError
+        return [Point(*row) for row in coordinates]
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise BezierKitError(
+            "invalid stdin: expected JSON object with a non-empty control_points array"
+        ) from exc
 
 
 def _parse_range(raw: str) -> list[float]:

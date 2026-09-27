@@ -87,3 +87,10 @@ def test_curve_reversal_is_an_involution() -> None:
     for t in [0, 0.2, 0.8, 1]:
         assert reversed_curve.at(t) == curve.at(1 - t)
         assert reversed_curve.reversed().at(t) == curve.at(t)
+
+
+def test_curve_exposes_immutable_control_points() -> None:
+    curve = BezierCurve.linear(Point(0, 0), Point(2, 3))
+    assert list(curve.control_points) == [Point(0, 0), Point(2, 3)]
+    with pytest.raises(ValueError):
+        curve.control_points.array[0, 0] = 9

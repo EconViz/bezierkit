@@ -7,7 +7,7 @@ import typer
 
 from bezierkit import BezierCurve, BezierKitError
 from bezierkit.cli.formatting import render_csv, render_json, render_table
-from bezierkit.cli.parsing import parse_point
+from bezierkit.cli.parsing import resolve_control_points
 from bezierkit.sampling import Sample, UniformSampler
 
 app = typer.Typer(help="Uniformly sample a Bézier curve.")
@@ -27,7 +27,10 @@ def _rows(result: Sample) -> list[dict[str, float]]:
 
 @app.callback(invoke_without_command=True)
 def sample(
-    points: Annotated[list[str], typer.Option("--points", help="Control point, e.g. '0,0'.")],
+    points: Annotated[
+        list[str] | None,
+        typer.Option("--points", help="Control point; omit to read construct JSON from stdin."),
+    ] = None,
     count: Annotated[
         int, typer.Option("--count", help="Number of samples, including endpoints.")
     ] = 50,
@@ -37,7 +40,7 @@ def sample(
     ] = None,
 ) -> None:
     """Sample a curve at uniformly spaced parameter values."""
-    curve = BezierCurve([parse_point(raw) for raw in points])
+    curve = BezierCurve(resolve_control_points(points))
     rows = _rows(UniformSampler(count).sample(curve))
     renderers = {"table": render_table, "csv": render_csv, "json": render_json}
     try:
