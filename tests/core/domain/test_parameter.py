@@ -29,5 +29,5 @@ def test_public_parameter_array_cannot_mutate_storage() -> None:
     exposed = values.array
     exposed.setflags(write=True)
     exposed[:] = [0.2, 0.8]
-    exposed.shape = (1, 2)
+    exposed.resize((1, 2), refcheck=False)
     assert np.allclose(values.array, [0, 1])

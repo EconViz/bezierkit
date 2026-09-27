@@ -101,7 +101,7 @@ def test_public_control_point_array_cannot_mutate_curve_storage() -> None:
     exposed = curve.control_points.array
     exposed.setflags(write=True)
     exposed[0] = [100, 100]
-    exposed.shape = (4, 1)
+    exposed.resize((4, 1), refcheck=False)
     assert curve.dimension == 2
     assert curve.degree == 1
     assert curve.at(0) == Point(0, 0)

@@ -36,5 +36,5 @@ def test_public_sample_parameters_cannot_mutate_storage() -> None:
     exposed = sample.t
     exposed.setflags(write=True)
     exposed[:] = [0.25, 0.75]
-    exposed.shape = (1, 2)
+    exposed.resize((1, 2), refcheck=False)
     assert np.allclose(sample.t, [0, 1])
