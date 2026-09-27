@@ -1,0 +1,49 @@
+import numpy as np
+import pytest
+
+from bezierkit.bezier.curve import BezierCurve
+from bezierkit.bezier.evaluation.evaluator import Evaluator
+from bezierkit.bezier.polygon import ControlPolygon
+from bezierkit.core.errors import DimensionMismatch, ParameterOutOfDomain
+from bezierkit.core.geometry.point import Point
+
+
+class FixedEvaluator(Evaluator):
+    def evaluate(self, polygon: ControlPolygon, t: np.ndarray) -> np.ndarray:
+        return np.full((len(t), polygon.dimension), 42.0)
+
+
+def test_curve_factories_and_scalar_evaluation_return_points() -> None:
+    curve = BezierCurve.cubic(Point(0, 0), Point(1, 2), Point(3, 2), Point(4, 0))
+    assert curve.degree == 3
+    assert curve.dimension == 2
+    assert curve(0) == Point(0, 0)
+    assert curve(1) == Point(4, 0)
+    assert curve(0.5) == Point(2, 1.5)
+
+
+def test_curve_vectorized_evaluation_returns_point_set() -> None:
+    curve = BezierCurve.linear(Point(0, 0), Point(4, 2))
+    points = curve.at_many([0, 0.5, 1])
+    assert np.allclose(points.array, [[0, 0], [2, 1], [4, 2]])
+
+
+def test_curve_rejects_parameter_outside_domain() -> None:
+    curve = BezierCurve.linear(Point(0, 0), Point(1, 1))
+    with pytest.raises(ParameterOutOfDomain):
+        curve.at(1.1)
+
+
+def test_curve_uses_injected_evaluator() -> None:
+    curve = BezierCurve([[0, 0], [1, 1]], evaluator=FixedEvaluator())
+    assert curve.at(0.5) == Point(42, 42)
+
+
+def test_curve_accepts_control_polygon() -> None:
+    polygon = ControlPolygon([[0, 0], [1, 1]])
+    assert BezierCurve(polygon).at(0.5) == Point(0.5, 0.5)
+
+
+def test_factory_rejects_mixed_dimensions() -> None:
+    with pytest.raises(DimensionMismatch):
+        BezierCurve.linear(Point(0, 0), Point(1, 1, 1))
