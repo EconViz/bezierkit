@@ -6,8 +6,10 @@ import numpy as np
 
 from bezierkit.bezier.evaluation.casteljau import DeCasteljauEvaluator
 from bezierkit.bezier.evaluation.evaluator import Evaluator
+from bezierkit.bezier.operations.hodograph import Hodograph
 from bezierkit.bezier.polygon import ControlPolygon
 from bezierkit.core.capabilities.curve import ParametricCurve
+from bezierkit.core.capabilities.differentiable import Differentiable
 from bezierkit.core.domain.interval import Interval
 from bezierkit.core.domain.parameter import ParameterValues
 from bezierkit.core.errors import DimensionMismatch
@@ -15,7 +17,7 @@ from bezierkit.core.geometry.point import Point
 from bezierkit.core.geometry.point_set import PointSet
 
 
-class BezierCurve(ParametricCurve):
+class BezierCurve(ParametricCurve, Differentiable):
     """An immutable, degree-generic Bézier curve."""
 
     def __init__(
@@ -45,6 +47,14 @@ class BezierCurve(ParametricCurve):
     def at_many(self, t: Iterable[float] | np.ndarray) -> PointSet:
         values = ParameterValues.from_input(t, domain=self.domain)
         return PointSet(self._evaluator.evaluate(self._polygon, values.array))
+
+    def derivative(self, order: int = 1) -> BezierCurve:
+        if not isinstance(order, int) or order < 0:
+            raise ValueError("derivative order must be a non-negative integer")
+        polygon = self._polygon
+        for _ in range(order):
+            polygon = Hodograph.of(polygon)
+        return BezierCurve(polygon, evaluator=self._evaluator)
 
     @classmethod
     def _from_points(cls, points: tuple[Point, ...]) -> BezierCurve:

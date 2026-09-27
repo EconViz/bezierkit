@@ -47,3 +47,24 @@ def test_curve_accepts_control_polygon() -> None:
 def test_factory_rejects_mixed_dimensions() -> None:
     with pytest.raises(DimensionMismatch):
         BezierCurve.linear(Point(0, 0), Point(1, 1, 1))
+
+
+def test_curve_derivative_obeys_endpoint_theorem() -> None:
+    curve = BezierCurve.cubic(Point(0, 0), Point(1, 2), Point(3, 2), Point(4, 0))
+    derivative = curve.derivative()
+    assert derivative.degree == 2
+    assert derivative.at(0) == Point(3, 6)
+    assert derivative.at(1) == Point(3, -6)
+
+
+def test_curve_higher_derivative_closes_on_zero_constant() -> None:
+    curve = BezierCurve.linear(Point(0, 0), Point(4, 2))
+    second = curve.derivative(2)
+    assert second.degree == 0
+    assert second.at(0.7) == Point(0, 0)
+
+
+def test_curve_derivative_validates_order() -> None:
+    curve = BezierCurve.linear(Point(0, 0), Point(1, 1))
+    with pytest.raises(ValueError, match="non-negative"):
+        curve.derivative(-1)
