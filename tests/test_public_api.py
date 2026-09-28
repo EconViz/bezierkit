@@ -1,9 +1,12 @@
 from bezierkit import (
     BezierCurve,
     BezierKitError,
+    BezierSubpath,
+    CubicBezierSegment,
     DegreeError,
     DimensionMismatch,
     ParameterOutOfDomain,
+    PiecewiseBezier,
     Point,
     Vector,
     __version__,
@@ -16,11 +19,13 @@ def test_documented_public_api_is_importable() -> None:
     curve = BezierCurve.linear(Point(0, 0), Point(1, 1))
     assert curve.at(0.5) == Point(0.5, 0.5)
     assert Vector(1, 2).dimension == 2
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.3.0"
     assert all(
         value is not None
         for value in [
             BezierKitError,
+            BezierSubpath,
+            CubicBezierSegment,
             DegreeError,
             DimensionMismatch,
             ParameterOutOfDomain,
@@ -29,5 +34,6 @@ def test_documented_public_api_is_importable() -> None:
             PlanarSlopes,
             Sample,
             UniformSampler,
+            PiecewiseBezier,
         ]
     )
