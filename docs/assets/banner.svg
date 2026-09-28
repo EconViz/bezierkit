@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="640" height="160" role="img" aria-label="bezierkit">
+  <title>bezierkit</title>
+
+  <!-- Cubic Bezier curve mark: control polygon + curve + control points -->
+  <g transform="translate(24, 24)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- control polygon -->
+    <path d="M 8 96 L 34 8 L 90 8 L 112 96" stroke="#c9c9c9" stroke-width="2" stroke-dasharray="5 6"/>
+
+    <!-- the cubic Bezier curve itself: P0(8,96) P1(34,8) P2(90,8) P3(112,96) -->
+    <path d="M 8 96 C 34 8, 90 8, 112 96" stroke="#181818" stroke-width="5"/>
+
+    <!-- endpoints P0, P3 -->
+    <circle cx="8" cy="96" r="5" fill="#181818"/>
+    <circle cx="112" cy="96" r="5" fill="#181818"/>
+
+    <!-- control points P1, P2 -->
+    <circle cx="34" cy="8" r="4" fill="#ffffff" stroke="#181818" stroke-width="2.5"/>
+    <circle cx="90" cy="8" r="4" fill="#ffffff" stroke="#181818" stroke-width="2.5"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="168" y="98" font-family="'JetBrains Mono','SFMono-Regular',Consolas,monospace" font-size="52" font-weight="700" letter-spacing="-1" fill="#181818">bezier<tspan fill="#8a8a8a">kit</tspan></text>
+</svg>
