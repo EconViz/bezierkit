@@ -29,7 +29,7 @@ uv sync --all-extras --dev
 ## Python API
 
 ```python
-from bezierkit import BezierCurve, Point
+from bezierkit import BezierCurve, CubicBezierSegment, PiecewiseBezier, Point
 from bezierkit.construction import PlanarSlopes
 from bezierkit.sampling import UniformSampler
 
@@ -39,6 +39,20 @@ curve = BezierCurve.cubic(
     Point(3, 2),
     Point(4, 0),
 )
+
+segment = CubicBezierSegment(
+    Point(0, 0),
+    Point(1, 2),
+    Point(3, 2),
+    Point(4, 0),
+)
+segment.control_points        # (P0, P1, P2, P3)
+
+path = PiecewiseBezier([
+    CubicBezierSegment.from_line(Point(0, 0), Point(2, 0)),
+    CubicBezierSegment.from_line(Point(2, 0), Point(2, 4)),
+])
+path.at(0.75)                 # Point(2.0, 2.0)
 
 curve.at(0.5)                 # Point(2.0, 1.5)
 curve.derivative().at(0.5)    # first derivative
@@ -55,6 +69,34 @@ demand = PlanarSlopes(
 
 The engine supports arbitrary degree and dimension. `Point`, `Vector`,
 `PointSet`, control polygons, and sampling results are immutable value objects.
+
+`CubicBezierSegment` is the primary renderer-facing value object. It exposes
+`p0`, `p1`, `p2`, `p3`, tight axis-aligned bounds, and cubic-preserving split
+and reversal operations. Existing `BezierCurve.cubic(...)` code remains valid;
+use `CubicBezierSegment.from_curve(curve)` to migrate without changing any
+control point, or `segment.as_curve()` when a degree-generic API is required.
+
+`PiecewiseBezier` divides `[0, 1]` uniformly across the segments of a single
+subpath. Closure is metadata and never inserts a hidden closing segment.
+`PiecewiseBezier.compound(...)` preserves independent subpaths for fills and
+holes; evaluate and split each subpath independently because a compound path
+has no single continuous parameterization. Reversal preserves each subpath;
+splitting is defined only for a single open subpath.
+
+Linear and quadratic inputs can be elevated without changing their geometry:
+
+```python
+from bezierkit.bezier import to_cubic
+
+cubic = to_cubic(BezierCurve.quadratic(
+    Point(0, 0), Point(3, 6), Point(9, 0)
+))
+```
+
+Batch evaluation uses a vectorized de Casteljau implementation by default.
+`BernsteinEvaluator` is also available from `bezierkit.bezier.evaluation` for
+explicit low-degree throughput tradeoffs; see `benchmarks/` for the
+reproducible 400, 10,000, and 100,000-value benchmark.
 
 ## Command-line interface
 
@@ -90,7 +132,7 @@ the subcommand when diagnosing unexpected failures.
 
 ## Scope
 
-The 0.2 release covers core geometry, Bézier evaluation and operations,
-endpoint construction, uniform sampling, and the initial CLI. Rendering is
-intentionally outside this package. Differential analysis, fitting,
-piecewise curves, intersections, B-splines, and NURBS are future work.
+The 0.3 release adds renderer-facing cubic segments, exact degree elevation,
+vectorized batch evaluation, and open, closed, and compound piecewise paths.
+Rendering remains intentionally outside this package. Differential analysis,
+adaptive fitting, intersections, B-splines, and NURBS are future work.
