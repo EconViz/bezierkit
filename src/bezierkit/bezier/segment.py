@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 
@@ -31,11 +32,16 @@ class CubicBezierSegment(ParametricCurve, Differentiable, Subdividable, Reversib
         repr=False,
         compare=False,
     )
+    fit_error: float | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
         dimensions = {point.dimension for point in self.control_points}
         if len(dimensions) != 1:
             raise DimensionMismatch(f"control point dimensions differ: {sorted(dimensions)}")
+        if self.fit_error is not None and (
+            not math.isfinite(self.fit_error) or self.fit_error < 0.0
+        ):
+            raise ValueError("fit_error must be finite and non-negative")
 
     @property
     def control_points(self) -> tuple[Point, Point, Point, Point]:
@@ -88,17 +94,25 @@ class CubicBezierSegment(ParametricCurve, Differentiable, Subdividable, Reversib
 
     def split(self, t: float) -> tuple[CubicBezierSegment, CubicBezierSegment]:
         left, right = self.as_curve().split(t)
-        return self.from_curve(left), self.from_curve(right)
+        left_segment = self.from_curve(left)
+        right_segment = self.from_curve(right)
+        return (
+            CubicBezierSegment(*left_segment.control_points, self._evaluator, self.fit_error),
+            CubicBezierSegment(*right_segment.control_points, self._evaluator, self.fit_error),
+        )
 
     def segment(self, t0: float, t1: float) -> CubicBezierSegment:
         curve = self.as_curve().segment(t0, t1)
         if curve.degree == 0:
             point = curve.at(0.0)
-            return CubicBezierSegment(point, point, point, point, self._evaluator)
-        return self.from_curve(curve)
+            return CubicBezierSegment(point, point, point, point, self._evaluator, self.fit_error)
+        result = self.from_curve(curve)
+        return CubicBezierSegment(*result.control_points, self._evaluator, self.fit_error)
 
     def reversed(self) -> CubicBezierSegment:
-        return CubicBezierSegment(self.p3, self.p2, self.p1, self.p0, self._evaluator)
+        return CubicBezierSegment(
+            self.p3, self.p2, self.p1, self.p0, self._evaluator, self.fit_error
+        )
 
     @classmethod
     def from_curve(cls, curve: BezierCurve) -> CubicBezierSegment:

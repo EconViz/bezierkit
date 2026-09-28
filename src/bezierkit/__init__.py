@@ -8,11 +8,12 @@ from bezierkit.core.errors import (
     DegreeError,
     DimensionMismatch,
     ParameterOutOfDomain,
+    ToleranceNotMet,
 )
 from bezierkit.core.geometry.point import Point
 from bezierkit.core.geometry.vector import Vector
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "BezierCurve",
@@ -24,6 +25,7 @@ __all__ = [
     "ParameterOutOfDomain",
     "PiecewiseBezier",
     "Point",
+    "ToleranceNotMet",
     "Vector",
     "__version__",
 ]

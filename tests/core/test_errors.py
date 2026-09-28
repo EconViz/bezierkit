@@ -5,10 +5,13 @@ from bezierkit.core.errors import (
     DegreeError,
     DimensionMismatch,
     ParameterOutOfDomain,
+    ToleranceNotMet,
 )
 
 
-@pytest.mark.parametrize("error", [DegreeError, DimensionMismatch, ParameterOutOfDomain])
+@pytest.mark.parametrize(
+    "error", [DegreeError, DimensionMismatch, ParameterOutOfDomain, ToleranceNotMet]
+)
 def test_public_errors_share_package_base(error: type[Exception]) -> None:
     assert issubclass(error, BezierKitError)
 
