@@ -1,0 +1,32 @@
+{
+  "python": "3.13.14",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "numpy": "2.5.3",
+  "repeats": 7,
+  "results": [
+    {
+      "parameters": 400,
+      "scalar_reference_seconds": 0.0021113750990480185,
+      "de_casteljau_seconds": 0.00004145805723965168,
+      "bernstein_seconds": 0.00003854092210531235,
+      "de_casteljau_speedup": 50.92797973728104,
+      "max_abs_difference": 1.7763568394002505e-15
+    },
+    {
+      "parameters": 10000,
+      "scalar_reference_seconds": 0.05423395801335573,
+      "de_casteljau_seconds": 0.0007537500932812691,
+      "bernstein_seconds": 0.0007797919679433107,
+      "de_casteljau_speedup": 71.95217419776532,
+      "max_abs_difference": 2.6645352591003757e-15
+    },
+    {
+      "parameters": 100000,
+      "scalar_reference_seconds": 0.5652798339724541,
+      "de_casteljau_seconds": 0.008972292067483068,
+      "bernstein_seconds": 0.008056749822571874,
+      "de_casteljau_speedup": 63.00283469606534,
+      "max_abs_difference": 2.6645352591003757e-15
+    }
+  ]
+}

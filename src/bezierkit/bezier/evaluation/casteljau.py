@@ -13,13 +13,12 @@ class DeCasteljauEvaluator(Evaluator):
         values = np.asarray(t, dtype=float)
         if values.ndim != 1:
             raise ValueError("evaluator parameter values must be one-dimensional")
-        result = np.empty((len(values), polygon.dimension), dtype=float)
         control = polygon.points.array
-        for row, value in enumerate(values):
-            work = control.copy()
-            for remaining in range(polygon.degree, 0, -1):
-                work[:remaining] = (
-                    (1.0 - value) * work[:remaining] + value * work[1 : remaining + 1]
-                )
-            result[row] = work[0]
-        return result
+        work = np.broadcast_to(control, (len(values), *control.shape)).copy()
+        parameters = values[:, np.newaxis, np.newaxis]
+        for remaining in range(polygon.degree, 0, -1):
+            work[:, :remaining] = (
+                (1.0 - parameters) * work[:, :remaining]
+                + parameters * work[:, 1 : remaining + 1]
+            )
+        return work[:, 0]
