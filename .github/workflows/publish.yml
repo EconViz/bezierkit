@@ -18,7 +18,7 @@ jobs:
 
       - name: Run test suite
         run: |
-          uv pip install -e ".[dev,cli]" --system
+          uv sync --all-extras --dev
           uv run ruff check src tests
           uv run lint-imports
           uv run pytest -v
