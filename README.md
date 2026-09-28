@@ -98,6 +98,43 @@ Batch evaluation uses a vectorized de Casteljau implementation by default.
 explicit low-degree throughput tradeoffs; see `benchmarks/` for the
 reproducible 400, 10,000, and 100,000-value benchmark.
 
+## Interpolation, fitting, and level sets
+
+```python
+from bezierkit.fitting import fit_graph
+from bezierkit.implicit import trace_implicit
+from bezierkit.interpolation import graph_hermite
+
+segment = graph_hermite(
+    x0=1, x1=1.5,
+    y0=4, y1=8 / 3,
+    m0=-8, m1=-32 / 9,
+)
+
+path = fit_graph(
+    lambda x: 4 / x**2,
+    lambda x: -8 / x**3,
+    x0=0.8, x1=3,
+    tolerance=1e-3,
+)
+
+contours = trace_implicit(
+    lambda x, y: x**2 * y,
+    levels=[1, 2, 4],
+    viewport=(0.5, 4, 0, 6),
+    resolution=(121, 121),
+    tolerance=0.01,
+    gradient=lambda x, y: (2 * x * y, x**2),
+)
+```
+
+Adaptive fitting reports a measured Euclidean error on every segment and
+raises `ToleranceNotMet` if configured limits prevent the requested tolerance.
+Implicit tracing preserves disconnected and closed components as independent
+paths and uses parametric gradient tangents, including at vertical tangencies.
+The derivations, error bound, continuity conditions, and sampling limitations
+are documented in `docs/math/interpolation.md`.
+
 ## Command-line interface
 
 Evaluate a curve or derivative:
@@ -132,7 +169,7 @@ the subcommand when diagnosing unexpected failures.
 
 ## Scope
 
-The 0.3 release adds renderer-facing cubic segments, exact degree elevation,
-vectorized batch evaluation, and open, closed, and compound piecewise paths.
-Rendering remains intentionally outside this package. Differential analysis,
-adaptive fitting, intersections, B-splines, and NURBS are future work.
+The 0.4 release adds graph and parametric Hermite interpolation,
+tolerance-controlled smooth and sampled-curve fitting, and domain-neutral
+implicit level-set tracing. Rendering remains intentionally outside this
+package. Intersections, B-splines, and NURBS are future work.
