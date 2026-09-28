@@ -135,6 +135,41 @@ paths and uses parametric gradient tangents, including at vertical tangencies.
 The derivations, error bound, continuity conditions, and sampling limitations
 are documented in `docs/math/interpolation.md`.
 
+## Exporters and adapters
+
+```python
+from bezierkit.export.json import dumps, loads
+from bezierkit.export.svg import to_svg_path_data
+from bezierkit.export.tikz import to_tikz
+
+json_document = dumps(path, metadata={"name": "indifference-curve"})
+same_path = loads(json_document).path
+svg_path_data = to_svg_path_data(path, precision=5)
+tikz = to_tikz(path, precision=5, options="thick")
+```
+
+TikZ uses native `.. controls ... and ... ..` commands and SVG uses native
+`C` commands; neither exporter flattens cubic geometry or chooses a theme.
+The versioned JSON schema preserves all controls, subpaths, closure, dimension,
+and caller metadata.
+
+Matplotlib interoperability is optional:
+
+```bash
+pip install "bezierkit[matplotlib]"
+```
+
+```python
+from bezierkit.adapters.matplotlib import from_path, to_path
+
+geometry = from_path(matplotlib_path, transform=affine_transform)
+round_trip = to_path(geometry)
+```
+
+Affine transforms preserve controls exactly. Non-affine transforms require
+the explicit `approximate_path(..., tolerance=...)` API. Format guarantees and
+round-trip tolerances are documented in `docs/exporters.md`.
+
 ## Command-line interface
 
 Evaluate a curve or derivative:
@@ -169,7 +204,7 @@ the subcommand when diagnosing unexpected failures.
 
 ## Scope
 
-The 0.4 release adds graph and parametric Hermite interpolation,
-tolerance-controlled smooth and sampled-curve fitting, and domain-neutral
-implicit level-set tracing. Rendering remains intentionally outside this
-package. Intersections, B-splines, and NURBS are future work.
+The 0.5 release adds stable JSON geometry, native TikZ and SVG cubic output,
+and optional Matplotlib Path interoperability. Rendering style and diagram
+semantics remain intentionally outside this package. Intersections, B-splines,
+and NURBS are future work.
