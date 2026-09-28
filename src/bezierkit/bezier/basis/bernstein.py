@@ -29,4 +29,15 @@ class BernsteinBasis:
         values = np.asarray(t, dtype=float)
         if values.ndim != 1:
             raise ValueError("BernsteinBasis.matrix requires a one-dimensional array")
-        return np.stack([self(float(value)) for value in values])
+        indices = np.arange(self.degree + 1)
+        coefficients = np.array(
+            [BinomialTable.coefficient(self.degree, int(index)) for index in indices],
+            dtype=float,
+        )
+        columns = indices[np.newaxis, :]
+        parameters = values[:, np.newaxis]
+        return (
+            coefficients[np.newaxis, :]
+            * parameters**columns
+            * (1.0 - parameters) ** (self.degree - columns)
+        )

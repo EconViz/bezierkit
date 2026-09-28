@@ -33,6 +33,11 @@ class BezierCurve(ParametricCurve, Differentiable, Subdividable, Reversible):
         self._evaluator = evaluator or DeCasteljauEvaluator()
 
     @property
+    def evaluator(self) -> Evaluator:
+        """The explicitly selected evaluation strategy."""
+        return self._evaluator
+
+    @property
     def dimension(self) -> int:
         return self._polygon.dimension
 
