@@ -12,3 +12,7 @@ class DegreeError(BezierKitError):
 
 class ParameterOutOfDomain(BezierKitError):
     """Raised when a parameter lies outside a curve's domain."""
+
+
+class ToleranceNotMet(BezierKitError):
+    """Raised when a bounded fitting operation cannot meet its tolerance."""
