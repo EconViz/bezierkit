@@ -65,3 +65,11 @@ def test_segment_equality_and_repr_are_deterministic() -> None:
     segment = make_segment()
     assert segment == make_segment()
     assert repr(segment) == repr(make_segment())
+
+
+def test_fit_error_is_validated_and_preserved_by_orientation_changes() -> None:
+    segment = CubicBezierSegment(*make_segment().control_points, fit_error=0.01)
+    assert segment.reversed().fit_error == 0.01
+    assert all(part.fit_error == 0.01 for part in segment.split(0.5))
+    with pytest.raises(ValueError, match="fit_error"):
+        CubicBezierSegment(*make_segment().control_points, fit_error=-1)
