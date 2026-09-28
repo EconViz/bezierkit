@@ -1,5 +1,12 @@
 # bezierkit
 
+<p align="center">
+  <a href="https://pypi.org/project/bezierkit/"><img alt="PyPI" src="https://img.shields.io/pypi/v/bezierkit?style=flat-square&color=181818&labelColor=f3f3f3&cacheSeconds=300"></a>
+  <a href="https://pypi.org/project/bezierkit/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/bezierkit?style=flat-square&color=181818&labelColor=f3f3f3"></a>
+  <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-181818?style=flat-square&color=181818&labelColor=f3f3f3"></a>
+  <img alt="Tests" src="https://img.shields.io/badge/tests-176%20passed-181818?style=flat-square&color=181818&labelColor=f3f3f3">
+</p>
+
 A small mathematical toolkit for constructing and analyzing Bézier curves.
 
 `bezierkit` is renderer-independent: it provides curve construction,
@@ -8,23 +15,27 @@ as EconViz, Matplotlib, Plotly, SVG, or Typst adapters.
 
 ## Installation
 
-Install the library only:
+Add the library to your project with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pip install bezierkit
+uv add bezierkit
 ```
 
-Install the optional command-line interface:
+Add the optional command-line interface:
 
 ```bash
-pip install "bezierkit[cli]"
+uv add "bezierkit[cli]"
 ```
 
-For development with [uv](https://docs.astral.sh/uv/):
+For development, clone the repo and sync all extras:
 
 ```bash
 uv sync --all-extras --dev
 ```
+
+Run anything inside the environment with `uv run`, e.g. `uv run pytest` or
+`uv run bezierkit --help`. A plain `pip install bezierkit` /
+`pip install "bezierkit[cli]"` also works if you are not using uv.
 
 ## Python API
 
@@ -156,7 +167,7 @@ and caller metadata.
 Matplotlib interoperability is optional:
 
 ```bash
-pip install "bezierkit[matplotlib]"
+uv add "bezierkit[matplotlib]"
 ```
 
 ```python
@@ -171,6 +182,10 @@ the explicit `approximate_path(..., tolerance=...)` API. Format guarantees and
 round-trip tolerances are documented in `docs/exporters.md`.
 
 ## Command-line interface
+
+Run `bezierkit` directly if it's installed in your active environment, or
+prefix every command with `uv run` (e.g. `uv run bezierkit --help`) when
+working inside a uv project without activating the venv.
 
 Evaluate a curve or derivative:
 
