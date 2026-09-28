@@ -1,6 +1,6 @@
 [project]
 name = "bezierkit"
-version = "0.4.0"
+version = "0.5.0"
 description = "A small mathematical toolkit for constructing and analyzing Bezier curves."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,6 +17,9 @@ bezierkit = "bezierkit.cli.app:main"
 cli = [
     "rich>=13",
     "typer>=0.12",
+]
+matplotlib = [
+    "matplotlib>=3.8",
 ]
 
 [build-system]
@@ -68,6 +71,8 @@ name = "application layers"
 type = "layers"
 layers = [
   "bezierkit.cli",
+  "bezierkit.adapters",
+  "bezierkit.export",
   "bezierkit.implicit",
   "bezierkit.fitting",
   "bezierkit.interpolation",
