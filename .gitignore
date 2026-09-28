@@ -9,6 +9,7 @@ htmlcov/
 dist/
 *.egg-info/
 .superpowers/
+.worktrees/
 
 # Planning docs — local-only, not tracked
 docs/spec/
