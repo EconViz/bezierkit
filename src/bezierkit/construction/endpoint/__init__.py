@@ -1,0 +1,1 @@
+"""Endpoint-based construction strategies."""

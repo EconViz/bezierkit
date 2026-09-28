@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+*.egg-info/
+.superpowers/
+.worktrees/
+
+# Planning docs — local-only, not tracked
+docs/spec/
+docs/plan/
