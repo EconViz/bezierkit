@@ -1,6 +1,6 @@
 [project]
 name = "bezierkit"
-version = "1.0.1"
+version = "1.0.0"
 description = "A small mathematical toolkit for constructing and analyzing Bezier curves."
 readme = "README.md"
 requires-python = ">=3.10"
