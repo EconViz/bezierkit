@@ -71,3 +71,54 @@ def test_split_rejects_closed_and_compound_paths() -> None:
         closed.split(0.5)
     with pytest.raises(ValueError, match="compound"):
         PiecewiseBezier.compound([closed, closed]).split(0.5)
+
+
+def curved_path() -> PiecewiseBezier:
+    return PiecewiseBezier(
+        [
+            CubicBezierSegment(Point(0, 0), Point(1, 2), Point(3, 2), Point(4, 0)),
+            CubicBezierSegment(Point(4, 0), Point(5, -2), Point(7, -2), Point(8, 0)),
+            CubicBezierSegment(Point(8, 0), Point(9, 2), Point(9, 4), Point(8, 5)),
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    ("t0", "t1"),
+    [
+        (0.25, 0.75),  # both ends inside segments, across a boundary
+        (0.1, 0.2),  # both ends inside the same segment
+        (0.1, 0.9),  # spans every segment
+        (1 / 3, 2 / 3),  # both ends on segment boundaries
+        (0.5, 1.0),
+        (0.0, 0.5),
+    ],
+)
+def test_segment_restricts_path_to_requested_parameter_interval(t0: float, t1: float) -> None:
+    path = curved_path()
+    part = path.segment(t0, t1)
+
+    assert part.at(0.0).coords == pytest.approx(path.at(t0).coords)
+    assert part.at(1.0).coords == pytest.approx(path.at(t1).coords)
+    # Every joint of the result lies on the original path inside [t0, t1].
+    parameters = [t0 + (t1 - t0) * k / 400 for k in range(401)]
+    reference = [path.at(value).coords for value in parameters]
+    for segment in part:
+        for point in (segment.p0, segment.p3):
+            assert min(
+                (point.coords[0] - x) ** 2 + (point.coords[1] - y) ** 2 for x, y in reference
+            ) == pytest.approx(0.0, abs=1e-3)
+
+
+def test_segment_on_a_boundary_adds_no_degenerate_piece() -> None:
+    path = curved_path()
+    assert path.segment(0.0, 1 / 3).segments == path.segments[:1]
+    assert path.segment(1 / 3, 1.0).segments == path.segments[1:]
+
+
+def test_segment_rejects_closed_and_compound_paths() -> None:
+    closed = PiecewiseBezier([line((0, 0), (1, 0)), line((1, 0), (0, 0))], closed=True)
+    with pytest.raises(ValueError, match="open"):
+        closed.segment(0.2, 0.6)
+    with pytest.raises(ValueError, match="compound"):
+        PiecewiseBezier.compound([closed, closed]).segment(0.2, 0.6)
