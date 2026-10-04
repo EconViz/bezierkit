@@ -8,7 +8,7 @@
   <a href="https://pypi.org/project/bezierkit/"><img alt="PyPI" src="https://img.shields.io/pypi/v/bezierkit?style=flat-square&color=181818&labelColor=f3f3f3&cacheSeconds=300"></a>
   <a href="https://pypi.org/project/bezierkit/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/bezierkit?style=flat-square&color=181818&labelColor=f3f3f3"></a>
   <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-181818?style=flat-square&color=181818&labelColor=f3f3f3"></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-176%20passed-181818?style=flat-square&color=181818&labelColor=f3f3f3">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-184%20passed-181818?style=flat-square&color=181818&labelColor=f3f3f3">
 </p>
 
 A small mathematical toolkit for constructing and analyzing Bézier curves.
@@ -223,7 +223,9 @@ the subcommand when diagnosing unexpected failures.
 
 ## Scope
 
-The 0.5 release adds stable JSON geometry, native TikZ and SVG cubic output,
-and optional Matplotlib Path interoperability. Rendering style and diagram
-semantics remain intentionally outside this package. Intersections, B-splines,
+Version 1.0 is the first stable release: the public API listed in
+`bezierkit.__all__` and the subpackages documented above follow semantic
+versioning from here on, and the JSON path schema stays at version 1. See
+[CHANGELOG.md](CHANGELOG.md) for the release history. Rendering style and
+diagram semantics remain intentionally outside this package. Intersections, B-splines,
 and NURBS are future work.
