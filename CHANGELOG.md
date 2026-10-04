@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file. The project
 follows [semantic versioning](https://semver.org/) from 1.0.0.
 
+## 1.0.1 (2026-10-04)
+
+### Fixed
+
+- The PyPI project description now shows the README banner: it is loaded
+  from an absolute URL instead of the repository-relative
+  `docs/assets/banner.svg`, which PyPI cannot resolve. No code changes.
+
 ## 1.0.0 (2026-10-04)
 
 First stable release. The public API is everything exported from `bezierkit`
