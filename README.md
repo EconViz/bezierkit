@@ -1,7 +1,7 @@
 # bezierkit
 
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="bezierkit" width="480">
+  <img src="https://raw.githubusercontent.com/EconViz/bezierkit/main/docs/assets/banner.svg" alt="bezierkit" width="480">
 </p>
 
 <p align="center">
