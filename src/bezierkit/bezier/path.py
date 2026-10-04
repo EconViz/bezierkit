@@ -215,7 +215,30 @@ class PiecewiseBezier(ParametricCurve, Subdividable, Reversible):
             )
         if start == 0.0 and end == 1.0:
             return self
-        _, suffix = self.split(start)
-        relative_end = (end - start) / (1.0 - start)
-        prefix, _ = suffix.split(relative_end)
-        return prefix
+        segments = self._single_segments("segment")
+        if self.closed:
+            raise ValueError("can only segment an open path")
+        # Locate each end as (segment index, local parameter) under the path's
+        # uniform parameterization; re-splitting an already split path would
+        # change that parameterization.
+        first_index, first_local = self._locate(start, len(segments))
+        last_index, last_local = self._locate(end, len(segments))
+        if first_index == last_index:
+            pieces = [segments[first_index].segment(first_local, last_local)]
+        else:
+            pieces = [
+                segments[first_index].segment(first_local, 1.0),
+                *segments[first_index + 1 : last_index],
+            ]
+            if last_local > 0.0:
+                pieces.append(segments[last_index].segment(0.0, last_local))
+        return PiecewiseBezier(pieces, continuity_tolerance=self.subpaths[0].continuity_tolerance)
+
+    @staticmethod
+    def _locate(value: float, count: int) -> tuple[int, float]:
+        """Segment index and local parameter of ``value`` among ``count`` segments."""
+        if value == 1.0:
+            return count - 1, 1.0
+        scaled = value * count
+        index = min(int(scaled), count - 1)
+        return index, scaled - index
