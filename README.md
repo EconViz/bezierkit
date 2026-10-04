@@ -1,16 +1,5 @@
 # bezierkit
 
-<p align="center">
-  <img src="docs/assets/banner.svg" alt="bezierkit" width="480">
-</p>
-
-<p align="center">
-  <a href="https://pypi.org/project/bezierkit/"><img alt="PyPI" src="https://img.shields.io/pypi/v/bezierkit?style=flat-square&color=181818&labelColor=f3f3f3&cacheSeconds=300"></a>
-  <a href="https://pypi.org/project/bezierkit/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/bezierkit?style=flat-square&color=181818&labelColor=f3f3f3"></a>
-  <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-181818?style=flat-square&color=181818&labelColor=f3f3f3"></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-184%20passed-181818?style=flat-square&color=181818&labelColor=f3f3f3">
-</p>
-
 A small mathematical toolkit for constructing and analyzing Bézier curves.
 
 `bezierkit` is renderer-independent: it provides curve construction,

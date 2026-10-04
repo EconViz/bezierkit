@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file. The project
 follows [semantic versioning](https://semver.org/) from 1.0.0.
 
+## 1.0.1 (2026-10-04)
+
+### Fixed
+
+- Removed the README header image and dynamic badges from the packaged project
+  description so PyPI does not render a broken repository-relative image or a
+  stale package-version badge.
+
 ## 1.0.0 (2026-10-04)
 
 First stable release. The public API is everything exported from `bezierkit`
