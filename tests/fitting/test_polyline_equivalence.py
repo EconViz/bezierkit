@@ -95,8 +95,6 @@ def test_fit_polyline_matches_reference(closed: bool, corners: bool) -> None:
             assert len(fitted.segments) == len(expected)
             for a, b in zip(fitted.segments, expected, strict=True):
                 assert a.control_points == b.control_points
-                # the batched norm can differ from the scalar one in the last bit (x86-64:
-                # 1.1e-16 for exactly collinear points, where the scalar norm gives 0)
-                assert a.fit_error == pytest.approx(b.fit_error, rel=0, abs=1e-12)
+                assert a.fit_error == b.fit_error
             checked += 1
     assert checked > 100

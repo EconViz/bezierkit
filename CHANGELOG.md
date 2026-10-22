@@ -14,15 +14,18 @@ follows [semantic versioning](https://semver.org/) from 1.0.0.
 
 ### Changed
 
-- Faster contour tracing with the same results. Marching squares, the Ramer-Douglas-Peucker
+- Faster contour tracing with identical results. Marching squares, the Ramer-Douglas-Peucker
   simplification in `fit_polyline`, its fit error, `PiecewiseBezier.at_many` and the endpoint keys
-  of the stitching step now work on arrays instead of one point at a time. The kernels apply the
-  same formulas in the same order as before, so the traced paths and control points are unchanged
-  in every test, and 14 figures rendered through utility-viz are byte-identical on macOS (ARM) and
-  on Linux (ARM and x86-64). A batched `norm` can differ from the scalar one in the last bit, so a
-  `fit_error` may differ by about 1e-16 (observed on x86-64: 1.1e-16 where exactly collinear points
-  gave 0.0). On the utility-viz indifference-map figures the traced figures render about 4x faster,
-  with the grid evaluation still done per point.
+  of the stitching step now work on arrays instead of one point at a time. Each kernel applies the
+  same formulas in the same order as the loop it replaces, and the points that could be the farthest
+  in a simplification or a fit error are measured again one at a time with the scalar formula,
+  because a batched norm or dot product can differ from the scalar one in the last bit (on x86-64 it
+  made collinear points 1.1e-16 apart where the scalar formula gives 0). The traced paths, control
+  points and `fit_error` values are therefore those of the previous implementation on every platform:
+  the tests compare each kernel with it, they pass on macOS (ARM) and on Linux (ARM and x86-64), and
+  14 figures rendered through utility-viz are byte-identical on all three. On the utility-viz
+  indifference-map figures the traced figures render about 3.7x faster, with the grid evaluation
+  still done per point.
 
 ## 1.0.1 (2026-10-04)
 
