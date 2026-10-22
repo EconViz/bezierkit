@@ -147,8 +147,23 @@ class PiecewiseBezier(ParametricCurve, Subdividable, Reversible):
         return segments[index].at(scaled - index)
 
     def at_many(self, t: Iterable[float] | np.ndarray) -> PointSet:
-        values = ParameterValues.from_input(t, domain=self.domain)
-        return PointSet([self.at(float(value)) for value in values.array])
+        values = ParameterValues.from_input(t, domain=self.domain).array
+        if values.size == 0:
+            return PointSet([self.at(float(value)) for value in values])
+        segments = self._single_segments("evaluate")
+        count = len(segments)
+        scaled = values * count
+        index = np.minimum(np.floor(scaled).astype(int), count - 1)
+        local = scaled - index
+        end = values == 1.0
+        index[end] = count - 1
+        local[end] = 1.0
+        out = np.empty((values.size, segments[0].dimension))
+        # one evaluation per segment instead of one per parameter value
+        for segment_index in np.unique(index).tolist():
+            mask = index == segment_index
+            out[mask] = segments[segment_index].at_many(local[mask]).array
+        return PointSet(out)
 
     def reversed(self) -> PiecewiseBezier:
         reversed_subpaths = [

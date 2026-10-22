@@ -63,51 +63,81 @@ def _interpolate(
     )
 
 
+_EDGES = ((0, 1), (1, 2), (2, 3), (3, 0))
+
+
 def _marching_segments(
     xs: np.ndarray, ys: np.ndarray, values: np.ndarray, level: float
 ) -> list[tuple[Point, Point]]:
+    """Marching squares with every crossing computed on arrays.
+
+    Cells are visited in row-major order and each crossing uses the arithmetic of
+    :func:`_interpolate`, so the segments, and their order, are those of the
+    cell-by-cell loop.
+    """
+    corners = (values[:-1, :-1], values[:-1, 1:], values[1:, 1:], values[1:, :-1])
+    high = [corner >= level for corner in corners]
+    crossing = np.stack([high[start] != high[end] for start, end in _EDGES], axis=-1)
+    count = crossing.sum(axis=-1)
+    rows, columns = np.nonzero(count >= 2)
+    if rows.size == 0:
+        return []
+    samples = np.stack([corner[rows, columns] for corner in corners], axis=-1)
+    cx = np.stack([xs[columns], xs[columns + 1], xs[columns + 1], xs[columns]], axis=-1)
+    cy = np.stack([ys[rows], ys[rows], ys[rows + 1], ys[rows + 1]], axis=-1)
+    start = np.array([edge[0] for edge in _EDGES])
+    end = np.array([edge[1] for edge in _EDGES])
+    first_value, second_value = samples[:, start], samples[:, end]
+    denominator = second_value - first_value
+    with np.errstate(divide="ignore", invalid="ignore"):
+        fraction = np.where(denominator == 0.0, 0.5, (level - first_value) / denominator)
+    fraction = np.minimum(1.0, np.maximum(0.0, fraction))
+    px = (cx[:, start] + fraction * (cx[:, end] - cx[:, start])).tolist()
+    py = (cy[:, start] + fraction * (cy[:, end] - cy[:, start])).tolist()
+    center_high = samples.sum(axis=1) / 4.0 >= level
+    first_high = samples[:, 0] >= level
+    cell_crossing = crossing[rows, columns].tolist()
     segments: list[tuple[Point, Point]] = []
-    for row in range(len(ys) - 1):
-        for column in range(len(xs) - 1):
-            corners = (
-                (float(xs[column]), float(ys[row])),
-                (float(xs[column + 1]), float(ys[row])),
-                (float(xs[column + 1]), float(ys[row + 1])),
-                (float(xs[column]), float(ys[row + 1])),
-            )
-            samples = (
-                float(values[row, column]),
-                float(values[row, column + 1]),
-                float(values[row + 1, column + 1]),
-                float(values[row + 1, column]),
-            )
-            high = tuple(value >= level for value in samples)
-            edges = ((0, 1), (1, 2), (2, 3), (3, 0))
-            crossings = {
-                edge: _interpolate(
-                    corners[start], corners[end], samples[start], samples[end], level
-                )
-                for edge, (start, end) in enumerate(edges)
-                if high[start] != high[end]
-            }
-            if len(crossings) == 2:
-                first, second = crossings.values()
-                if first != second:
-                    segments.append((first, second))
-            elif len(crossings) == 4:
-                center_high = sum(samples) / 4.0 >= level
-                pairs = ((0, 1), (2, 3)) if center_high == high[0] else ((0, 3), (1, 2))
-                segments.extend((crossings[first], crossings[second]) for first, second in pairs)
+    for i, n in enumerate(count[rows, columns].tolist()):
+        if n == 2:
+            a, b = (edge for edge in range(4) if cell_crossing[i][edge])
+            first, second = Point(px[i][a], py[i][a]), Point(px[i][b], py[i][b])
+            if first != second:
+                segments.append((first, second))
+        else:
+            same = bool(center_high[i]) == bool(first_high[i])
+            pairs = ((0, 1), (2, 3)) if same else ((0, 3), (1, 2))
+            points = {edge: Point(px[i][edge], py[i][edge]) for edge in range(4)}
+            segments.extend((points[a], points[b]) for a, b in pairs)
     return segments
+
+
+def _endpoint_keys(points: list[Point], scale: float) -> dict[int, tuple[int, int]]:
+    """Rounded grid keys of all endpoints, computed in one array operation.
+
+    ``np.round`` rounds half to even, as :func:`round` does. Values too large for exact
+    integers, and non-finite ones, are left to the per-point path.
+    """
+    if not points:
+        return {}
+    with np.errstate(over="ignore"):
+        scaled = np.array([(point.x, point.y) for point in points], dtype=float) / scale
+    if not np.all(np.abs(scaled) < 2**52):
+        return {}
+    rounded = np.round(scaled).astype(np.int64).tolist()
+    return {id(point): (a, b) for point, (a, b) in zip(points, rounded, strict=True)}
 
 
 def _stitch(
     segments: Iterable[tuple[Point, Point]], *, tolerance: float
 ) -> list[tuple[list[Point], bool]]:
+    segments = list(segments)
     scale = max(tolerance, np.finfo(float).eps)
+    keys = _endpoint_keys([point for pair in segments for point in pair], scale)
 
     def key(point: Point) -> tuple[int, int]:
-        return (round(point.x / scale), round(point.y / scale))
+        cached = keys.get(id(point))
+        return cached if cached is not None else (round(point.x / scale), round(point.y / scale))
 
     unique: dict[tuple[tuple[int, int], tuple[int, int]], tuple[Point, Point]] = {}
     for first, second in segments:
@@ -242,9 +272,58 @@ def trace_implicit(
     xs = np.linspace(xmin, xmax, nx)
     ys = np.linspace(ymin, ymax, ny)
     values = np.asarray([[function(float(x), float(y)) for x in xs] for y in ys], dtype=float)
+    return _trace_values(xs, ys, values, level_values, allowed, gradient)
+
+
+def trace_sampled(
+    xs: np.ndarray,
+    ys: np.ndarray,
+    values: np.ndarray,
+    *,
+    levels: float | Iterable[float],
+    tolerance: float = 1e-2,
+    gradient: Gradient | None = None,
+) -> ContourSet:
+    """Trace ``values[row, column] = level`` on a grid that is already sampled.
+
+    ``values[row, column]`` is the field at ``(xs[column], ys[row])``. This is what
+    :func:`trace_implicit` does after it has evaluated the field, so a caller that can
+    evaluate the whole grid at once, for example with a vectorized function, skips the
+    per-point calls.
+    """
+    xs = np.asarray(xs, dtype=float)
+    ys = np.asarray(ys, dtype=float)
+    values = np.asarray(values, dtype=float)
+    if xs.ndim != 1 or ys.ndim != 1 or xs.size < 2 or ys.size < 2:
+        raise ValueError("xs and ys must be one-dimensional with at least 2 samples")
+    if values.shape != (ys.size, xs.size):
+        raise ValueError("values must have shape (len(ys), len(xs))")
+    if not (np.all(np.diff(xs) > 0.0) and np.all(np.diff(ys) > 0.0)):
+        raise ValueError("xs and ys must be finite and increasing")
+    allowed = float(tolerance)
+    if not math.isfinite(allowed) or allowed <= 0.0:
+        raise ValueError("tolerance must be finite and positive")
+    level_values = (
+        (float(levels),) if isinstance(levels, (int, float)) else tuple(map(float, levels))
+    )
+    if not level_values or not all(math.isfinite(level) for level in level_values):
+        raise ValueError("levels must contain finite values")
+    return _trace_values(xs, ys, values, level_values, allowed, gradient)
+
+
+def _trace_values(
+    xs: np.ndarray,
+    ys: np.ndarray,
+    values: np.ndarray,
+    level_values: tuple[float, ...],
+    allowed: float,
+    gradient: Gradient | None,
+) -> ContourSet:
     if not np.all(np.isfinite(values)):
         raise ValueError("scalar field returned a non-finite value inside the viewport")
-    join_tolerance = max((xmax - xmin) / (nx - 1), (ymax - ymin) / (ny - 1)) * 1e-7
+    join_tolerance = (
+        max((xs[-1] - xs[0]) / (xs.size - 1), (ys[-1] - ys[0]) / (ys.size - 1)) * 1e-7
+    )
     traced: list[LevelContours] = []
     for level in level_values:
         raw = _marching_segments(xs, ys, values, level)
