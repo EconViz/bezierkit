@@ -122,3 +122,37 @@ def test_segment_rejects_closed_and_compound_paths() -> None:
         closed.segment(0.2, 0.6)
     with pytest.raises(ValueError, match="compound"):
         PiecewiseBezier.compound([closed, closed]).segment(0.2, 0.6)
+
+
+def _reference_at_many(path, values):
+    return [path.at(float(value)) for value in values]
+
+
+def test_at_many_matches_pointwise_evaluation() -> None:
+    import numpy as np
+
+    from bezierkit.bezier.path import ParameterValues
+
+    rng = np.random.default_rng(3)
+    for count in (1, 2, 5, 16):
+        segments = [
+            CubicBezierSegment(
+                *(Point(float(i + rng.uniform()), float(rng.uniform())) for _ in range(4))
+            )
+            for i in range(count)
+        ]
+        path = PiecewiseBezier(segments, continuity_tolerance=10.0)
+        values = np.concatenate([[0.0, 1.0, 0.5], rng.uniform(0, 1, 200), np.linspace(0, 1, 33)])
+        parameters = ParameterValues.from_input(values, domain=path.domain).array
+        expected = _reference_at_many(path, parameters)
+        assert list(path.at_many(values)) == expected
+
+
+def test_at_many_of_nothing_and_of_a_compound_path() -> None:
+    import pytest
+
+    segment = CubicBezierSegment.from_line(Point(0, 0), Point(1, 0))
+    other = CubicBezierSegment.from_line(Point(5, 5), Point(6, 5))
+    compound = PiecewiseBezier.compound([PiecewiseBezier([segment]), PiecewiseBezier([other])])
+    with pytest.raises(ValueError, match="compound"):
+        compound.at_many([0.5])

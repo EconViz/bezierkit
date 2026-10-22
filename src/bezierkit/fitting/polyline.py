@@ -63,19 +63,39 @@ def _turning_angle(previous: Point, current: Point, following: Point) -> float:
     return math.acos(cosine)
 
 
+def _chord_distances(
+    array: np.ndarray, start: int, end: int, *, inclusive: bool = False
+) -> np.ndarray:
+    """Distances of the points between ``start`` and ``end`` to the chord ``start``-``end``.
+
+    The arithmetic is that of :func:`_point_segment_distance`, applied to every
+    point in one array operation. With ``inclusive`` the end points are measured too.
+    """
+    first = array[start]
+    chord = array[end] - first
+    denominator = float(chord @ chord)
+    span = array[start : end + 1] if inclusive else array[start + 1 : end]
+    if denominator == 0.0:
+        return np.linalg.norm(span - first, axis=1)
+    position = np.clip(((span - first) @ chord) / denominator, 0.0, 1.0)
+    return np.linalg.norm(span - (first + position[:, None] * chord), axis=1)
+
+
 def _rdp_indices(points: Sequence[Point], start: int, end: int, tolerance: float) -> list[int]:
+    array = np.asarray([point.coords for point in points], dtype=float)
+    return _rdp_array(array, start, end, tolerance)
+
+
+def _rdp_array(array: np.ndarray, start: int, end: int, tolerance: float) -> list[int]:
     if end <= start + 1:
         return [start, end]
-    distances = [
-        _point_segment_distance(points[index], points[start], points[end])
-        for index in range(start + 1, end)
-    ]
-    maximum = max(distances)
-    if maximum <= tolerance:
+    distances = _chord_distances(array, start, end)
+    offset = int(np.argmax(distances))
+    if distances[offset] <= tolerance:
         return [start, end]
-    split = start + 1 + distances.index(maximum)
-    return _rdp_indices(points, start, split, tolerance)[:-1] + _rdp_indices(
-        points, split, end, tolerance
+    split = start + 1 + offset
+    return _rdp_array(array, start, split, tolerance)[:-1] + _rdp_array(
+        array, split, end, tolerance
     )
 
 
@@ -108,19 +128,17 @@ def fit_polyline(
             )
             >= threshold
         )
+    array = np.asarray([point.coords for point in normalized], dtype=float)
     anchors: list[int] = []
     ordered = sorted(required)
     for start, end in zip(ordered, ordered[1:], strict=False):
-        section = _rdp_indices(normalized, start, end, allowed)
+        section = _rdp_array(array, start, end, allowed)
         anchors.extend(section[:-1])
     anchors.append(ordered[-1])
 
     segments: list[CubicBezierSegment] = []
     for start, end in zip(anchors, anchors[1:], strict=False):
-        error = max(
-            _point_segment_distance(point, normalized[start], normalized[end])
-            for point in normalized[start : end + 1]
-        )
+        error = float(np.max(_chord_distances(array, start, end, inclusive=True)))
         segment = CubicBezierSegment.from_line(normalized[start], normalized[end])
         segments.append(CubicBezierSegment(*segment.control_points, fit_error=error))
     return PiecewiseBezier(segments, closed=closed)

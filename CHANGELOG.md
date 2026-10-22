@@ -3,6 +3,27 @@
 All notable changes to this project are documented in this file. The project
 follows [semantic versioning](https://semver.org/) from 1.0.0.
 
+## Unreleased
+
+### Added
+
+- `bezierkit.implicit.trace_sampled(xs, ys, values, *, levels, ...)` traces
+  level sets of a field that has already been sampled on a grid. A caller that
+  can evaluate the whole grid in one vectorized call skips the one Python call
+  per grid point that `trace_implicit` makes.
+
+### Changed
+
+- Faster contour tracing with identical results. Marching squares, the
+  Ramer-Douglas-Peucker simplification in `fit_polyline`, its fit error,
+  `PiecewiseBezier.at_many` and the endpoint keys of the stitching step now work
+  on arrays instead of one point at a time. Every kernel applies the same
+  floating-point operations in the same order as before, so the traced paths,
+  control points and `fit_error` values are bit for bit unchanged; the tests
+  compare each kernel with the previous implementation. On the utility-viz
+  indifference-map figures the traced figures render about 4x faster, with the
+  grid evaluation still done per point.
+
 ## 1.0.1 (2026-10-04)
 
 ### Fixed
