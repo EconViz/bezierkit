@@ -5,6 +5,8 @@ follows [semantic versioning](https://semver.org/) from 1.0.0.
 
 ## Unreleased
 
+## 1.1.1 (2026-10-25)
+
 ### Added
 
 - `RotationConnector` constructs a quadratic connector between two points around a pivot. Its
