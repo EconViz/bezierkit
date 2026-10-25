@@ -2,6 +2,7 @@ import pytest
 
 from bezierkit.core.errors import (
     BezierKitError,
+    DegenerateGeometry,
     DegreeError,
     DimensionMismatch,
     ParameterOutOfDomain,
@@ -10,7 +11,8 @@ from bezierkit.core.errors import (
 
 
 @pytest.mark.parametrize(
-    "error", [DegreeError, DimensionMismatch, ParameterOutOfDomain, ToleranceNotMet]
+    "error",
+    [DegenerateGeometry, DegreeError, DimensionMismatch, ParameterOutOfDomain, ToleranceNotMet],
 )
 def test_public_errors_share_package_base(error: type[Exception]) -> None:
     assert issubclass(error, BezierKitError)

@@ -7,6 +7,7 @@ from bezierkit.bezier.path import BezierSubpath, PiecewiseBezier
 from bezierkit.bezier.segment import CubicBezierSegment
 from bezierkit.core.errors import (
     BezierKitError,
+    DegenerateGeometry,
     DegreeError,
     DimensionMismatch,
     ParameterOutOfDomain,
@@ -25,6 +26,7 @@ __all__ = [
     "BezierKitError",
     "BezierSubpath",
     "CubicBezierSegment",
+    "DegenerateGeometry",
     "DegreeError",
     "DimensionMismatch",
     "ParameterOutOfDomain",

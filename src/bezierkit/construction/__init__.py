@@ -2,6 +2,7 @@
 
 from bezierkit.construction.endpoint.derivatives import EndpointDerivatives
 from bezierkit.construction.endpoint.tangents import TangentDirections
+from bezierkit.construction.planar.rotation import RotationConnector
 from bezierkit.construction.planar.slopes import PlanarSlopes
 
-__all__ = ["EndpointDerivatives", "PlanarSlopes", "TangentDirections"]
+__all__ = ["EndpointDerivatives", "PlanarSlopes", "RotationConnector", "TangentDirections"]

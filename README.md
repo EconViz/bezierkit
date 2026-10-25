@@ -45,7 +45,7 @@ Run anything inside the environment with `uv run`, e.g. `uv run pytest` or
 
 ```python
 from bezierkit import BezierCurve, CubicBezierSegment, PiecewiseBezier, Point
-from bezierkit.construction import PlanarSlopes
+from bezierkit.construction import PlanarSlopes, RotationConnector
 from bezierkit.sampling import UniformSampler
 
 curve = BezierCurve.cubic(
@@ -79,6 +79,12 @@ demand = PlanarSlopes(
     end=Point(5, 0),
     start_slope=-2,
     end_slope=-0.3,
+).build()
+
+turn = RotationConnector(
+    start=Point(1, 0),
+    end=Point(0.966, 0.259),
+    pivot=Point(0, 0),
 ).build()
 ```
 
