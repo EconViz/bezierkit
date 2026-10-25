@@ -6,6 +6,10 @@ class DimensionMismatch(BezierKitError):
     """Raised when geometric values have incompatible dimensions."""
 
 
+class DegenerateGeometry(BezierKitError):
+    """Raised when a construction has no well-defined geometric result."""
+
+
 class DegreeError(BezierKitError):
     """Raised when a curve degree is invalid for an operation."""
 

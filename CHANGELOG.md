@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file. The project
 follows [semantic versioning](https://semver.org/) from 1.0.0.
 
+## Unreleased
+
+### Added
+
+- `RotationConnector` constructs a quadratic connector between two points around a pivot. Its
+  curvature is derived from the included angle, supports mirrored concavity, and is invariant
+  under translation, rotation, and uniform scaling. Degenerate inputs raise the new
+  `DegenerateGeometry` error.
+
 ## 1.1.0 (2026-10-22)
 
 ### Added

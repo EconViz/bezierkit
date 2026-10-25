@@ -3,6 +3,7 @@ from bezierkit import (
     BezierKitError,
     BezierSubpath,
     CubicBezierSegment,
+    DegenerateGeometry,
     DegreeError,
     DimensionMismatch,
     ParameterOutOfDomain,
@@ -12,7 +13,12 @@ from bezierkit import (
     Vector,
     __version__,
 )
-from bezierkit.construction import EndpointDerivatives, PlanarSlopes, TangentDirections
+from bezierkit.construction import (
+    EndpointDerivatives,
+    PlanarSlopes,
+    RotationConnector,
+    TangentDirections,
+)
 from bezierkit.sampling import Sample, UniformSampler
 
 
@@ -28,11 +34,13 @@ def test_documented_public_api_is_importable() -> None:
             BezierSubpath,
             CubicBezierSegment,
             DegreeError,
+            DegenerateGeometry,
             DimensionMismatch,
             ParameterOutOfDomain,
             EndpointDerivatives,
             TangentDirections,
             PlanarSlopes,
+            RotationConnector,
             Sample,
             UniformSampler,
             PiecewiseBezier,
